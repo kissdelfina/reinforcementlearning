@@ -1,0 +1,75 @@
+\documentclass[11pt,a4paper]{article}
+
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\geometry{margin=2.5cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlist{itemsep=0.25em,topsep=0.3em}
+\renewcommand{\arraystretch}{1.25}
+\setcounter{secnumdepth}{0}
+
+\newcommand{\argmax}{\operatorname*{arg\,max}}
+\newcommand{\concepto}[1]{%
+  \begin{center}
+    \fcolorbox{black}{gray!8}{\parbox{0.88\linewidth}{\centering #1}}
+  \end{center}%
+}
+
+\begin{document}
+
+{\LARGE\bfseries Dynamic Programming\par}
+\vspace{0.7em}
+{\normalsize\bfseries INTRODUCCIÓN TEÓRICO-PRÁCTICA AL APRENDIZAJE POR REFUERZO\par}
+\vspace{0.35em}
+\textbf{Profesor:} Matias Bilkis
+\hfill
+\textbf{Cuatrimestre:} Segundo cuatrimestre 2026
+
+\vspace{0.25em}
+\textbf{Integrantes}
+
+\begin{tabularx}{\textwidth}{@{}X@{\hspace{2em}}X@{}}
+Agustín Calo \hfill 390/23 & Paz Lavenia \hfill 64/23 \\
+Rocco Gasparini \hfill 102/24 & Silvano Picard \hfill 637/24 \\
+Maria Delfina Kiss \hfill 72/23 & Ingrid von Foerster \hfill 150/23
+\end{tabularx}
+
+\vspace{0.35em}
+\hrule
+
+\section{Análisis de Value Iteration}
+Para este análisis, partimos del código base de \textit{Value Iteration} que nos dieron en clase. El entorno modelado es un laberinto representado como una grilla de $n \times n$ con un 20\% de paredes ubicadas al azar y un estado objetivo. El objetivo del experimento fue variar el tamaño de la grilla (desde $n=10$ hasta $n=100$, en saltos de 10) para evaluar cómo escala el algoritmo.
+
+
+A partir de las ejecuciones, generamos los gráficos de rendimiento (ver Figura \ref{fig:escalabilidad}) y observamos dos comportamientos bien marcados:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{iteraciones.png}
+    \caption{Tiempo de convergencia e iteraciones necesarias en función del tamaño de la grilla.}
+    \label{fig:escalabilidad}
+\end{figure}
+
+\begin{itemize}
+    \item \textbf{Las iteraciones escalan linealmente (gráfico derecho):} La cantidad de barridos que necesita el algoritmo para converger crece de manera directamente proporcional al tamaño $n$ (va de 20 a 200 iteraciones). Esto tiene sentido ya que la señal del valor de recompensa tiene que propagarse desde la meta hasta el extremo opuesto del laberinto, y esa distancia máxima crece linealmente a medida que la grilla se hace más grande.
+    
+    \item \textbf{El tiempo de ejecución se dispara (gráfico izquierdo):} A diferencia de las iteraciones, la curva de tiempo muestra un crecimiento de tipo polinómico. Esto ocurre porque la cantidad total de estados (celdas) crece al cuadrado ($n^2$). Al multiplicar las iteraciones, que crecen en el orden de $O(n)$, por un procesamiento matricial sobre $n^2$ celdas, el costo computacional total termina rondando un $O(n^3)$.
+\end{itemize}
+
+En conclusión, los tiempos absolutos son muy bajos (el entorno de $100 \times 100$ converge en menos de 0.15 segundos). Sin embargo, el experimento deja clarísimo cómo afecta la maldición de la dimensionalidad a \textit{Value Iteration}, si siguiéramos aumentando el tamaño del laberinto, el hecho de tener que evaluar todo el espacio de estados en cada iteración haría que el tiempo se vuelva inmanejable rápidamente.
+
+
+\end{document}
