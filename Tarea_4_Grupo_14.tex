@@ -51,10 +51,10 @@ Maria Delfina Kiss \hfill 72/23 & Ingrid von Foerster \hfill 150/23
 \hrule
 
 \section{Análisis de Value Iteration}
-Para este análisis, partimos del código base de \textit{Value Iteration} que nos dieron en clase. El entorno modelado es un laberinto representado como una grilla de $n \times n$ con un 20\% de paredes ubicadas al azar y un estado objetivo. El objetivo del experimento fue variar el tamaño de la grilla (desde $n=10$ hasta $n=100$, en saltos de 10) para evaluar cómo escala el algoritmo.
+Usamos el código base de \textit{Value Iteration} que se dio en clase. El entorno modelado es un laberinto representado como una grilla de $n \times n$ con un 20\% de paredes ubicadas al azar y un estado objetivo. El objetivo del experimento fue variar el tamaño de la grilla (desde $n=10$ hasta $n=1000$, en saltos de 100 a partir de $n=1000$) para evaluar cómo escala el algoritmo.
 
 
-A partir de las ejecuciones, generamos los gráficos de rendimiento (ver Figura \ref{fig:escalabilidad}) y observamos dos comportamientos bien marcados:
+A partir de las ejecuciones, generamos los gráficos de rendimiento (ver Figura \ref{fig:escalabilidad}) y notamos algunos comportamientos:
 
 \begin{figure}[h]
     \centering
@@ -64,12 +64,12 @@ A partir de las ejecuciones, generamos los gráficos de rendimiento (ver Figura 
 \end{figure}
 
 \begin{itemize}
-    \item \textbf{Las iteraciones escalan linealmente (gráfico derecho):} La cantidad de barridos que necesita el algoritmo para converger crece de manera directamente proporcional al tamaño $n$ (va de 20 a 200 iteraciones). Esto tiene sentido ya que la señal del valor de recompensa tiene que propagarse desde la meta hasta el extremo opuesto del laberinto, y esa distancia máxima crece linealmente a medida que la grilla se hace más grande.
+    \item \textbf{Meseta en las iteraciones (gráfico derecho):} Al principio, la cantidad de barridos crece linealmente. Sin embargo, a partir de $n=500$, la curva se estanca por completo en torno a las 900 iteraciones. Esto ocurre por la combinación del factor de descuento ($\gamma = 0.99$) y el umbral de tolerancia ($\theta = 10^{-4}$). Al ser la grilla tan masiva, la recompensa se atenúa tanto con la distancia que, para los estados más alejados, las actualizaciones caen por debajo de $\theta$ y el algoritmo corta antes de que la señal se propague por todo el laberinto.
     
-    \item \textbf{El tiempo de ejecución se dispara (gráfico izquierdo):} A diferencia de las iteraciones, la curva de tiempo muestra un crecimiento de tipo polinómico. Esto ocurre porque la cantidad total de estados (celdas) crece al cuadrado ($n^2$). Al multiplicar las iteraciones, que crecen en el orden de $O(n)$, por un procesamiento matricial sobre $n^2$ celdas, el costo computacional total termina rondando un $O(n^3)$.
+    \item \textbf{Crecimiento polinómico del tiempo (gráfico izquierdo):} La curva temporal se dispara, alcanzando casi los 80 segundos para la grilla más grande. Esto refleja el costo de evaluar matrices donde el total de estados crece cuadráticamente ($n^2$). Para $n=1000$, estamos operando sobre un millón de celdas por iteración.
 \end{itemize}
 
-En conclusión, los tiempos absolutos son muy bajos (el entorno de $100 \times 100$ converge en menos de 0.15 segundos). Sin embargo, el experimento deja clarísimo cómo afecta la maldición de la dimensionalidad a \textit{Value Iteration}, si siguiéramos aumentando el tamaño del laberinto, el hecho de tener que evaluar todo el espacio de estados en cada iteración haría que el tiempo se vuelva inmanejable rápidamente.
+En conclusión, llevar la grilla hasta $n=1000$ ilustra el límite práctico de \textit{Value Iteration}. No solo el tiempo de procesamiento se dispara por el volumen del espacio de estados, sino que la atenuación geométrica de las recompensas impide que el algoritmo resuelva los caminos óptimos completos en distancias extremadamente largas bajo estos hiperparámetros.
 
 
 \end{document}
