@@ -71,5 +71,49 @@ A partir de las ejecuciones, generamos los gráficos de rendimiento (ver Figura 
 
 En conclusión, llevar la grilla hasta $n=1000$ ilustra el límite práctico de \textit{Value Iteration}. No solo el tiempo de procesamiento se dispara por el volumen del espacio de estados, sino que la atenuación geométrica de las recompensas impide que el algoritmo resuelva los caminos óptimos completos en distancias extremadamente largas bajo estos hiperparámetros.
 
+\section{Capítulo 4: Programación Dinámica}
+
+Definimos la \textbf{Programación Dinámica (DP)} como un conjunto de algoritmos diseñados para calcular políticas óptimas asumiendo un modelo perfecto del entorno modelado como un MDP. Aunque son de utilidad práctica limitada por su alto costo computacional y la necesidad de un modelo perfecto, son teóricamente fundamentales; el resto de los métodos de RL buscan imitar su efecto con menos cómputo y sin modelos exactos.
+
+Se trabaja bajo la premisa de que los conjuntos de estados ($S$), acciones ($A(s)$) y recompensas ($R$) son finitos, rigiéndose por probabilidades de transición $p(s', r \vert s, a)$.
+
+Los algoritmos de programación dinámica se construyen tomando las ecuaciones de optimalidad de Bellman y transformándolas en reglas de actualización iterativas (asignaciones) para mejorar aproximaciones sucesivas de las funciones de valor.
+
+\noindent\textbf{Recuerdo las ecuaciones de Bellman para $v^*(s)$ y $q^*(s, a)$:}
+
+    \[ v^*(s) = \max_a \sum_{s', r} p(s', r \vert s, a) \left[ r + \gamma v^*(s') \right] \]
+    \[ q^*(s, a) = \sum_{s', r} p(s', r \vert s, a) \left[ r + \gamma \max_{a'} q^*(s', a') \right] \]
+
+\subsection*{Evaluación de Políticas}
+La \textbf{Evaluación de Políticas} constituye el proceso iterativo destinado a calcular la función de valor $v_\pi$ bajo una política arbitraria $\pi$. Estas operaciones se ejecutan mediante \textbf{\textit{Full Backups}}, las cuales consideran todas las transiciones posibles de un solo paso junto con sus respectivas recompensas esperadas, prescindiendo del uso de muestras individuales. Para optimizar el rendimiento computacional, se implementa la \textbf{actualización in-place}, empleando una única estructura de datos donde los nuevos valores sobrescriben de inmediato a los anteriores durante cada barrido del espacio de estados, acelerando así la convergencia del algoritmo. Dicho proceso iterativo se detiene al satisfacer la \textbf{condición de parada}, la cual evalúa que el cambio máximo entre estimaciones sucesivas sea inferior a un umbral $\theta$:
+\[ \max_{s \in S} |v_{k+1}(s) - v_k(s)| < \theta \]
+    
+\subsection*{Policy Improvement}
+Para saber si conviene cambiar de acción en un estado $s$, evaluamos el valor de tomar dicha acción y luego seguir la política actual $\pi$, formalizado mediante $q_\pi(s, a)$. el Teorema de \textbf{Policy Improvement} establece que si una nueva política $\pi'$ cumple con que $q_\pi(s, \pi'(s)) \ge v_\pi(s)$ para todo estado, entonces $\pi'$ es tan buena o mejor que $\pi$ ($v_{\pi'}(s) \ge v_\pi(s)$). Esto es una politica greedy pues la nueva política se obtiene seleccionando en cada estado la acción que maximiza la función de valor actual: $\pi'(s) = \arg\max_a q_\pi(s, a)$.
+
+
+\subsection*{Policy Iteration}
+Mediante la alternancia sucesiva entre la evaluación de políticas ($\xrightarrow{E}$) y su respectiva mejora ($\xrightarrow{I}$), se genera una secuencia monótona que converge hacia la política y función de valor óptimas:
+
+\begin{equation*}
+    \pi_0 \stackrel{E}{\longrightarrow} v_{\pi_0} \stackrel{I}{\longrightarrow} \pi_1 \stackrel{E}{\longrightarrow} v_{\pi_1} \stackrel{I}{\longrightarrow} \pi_2 \stackrel{E}{\longrightarrow} \dots \stackrel{I}{\longrightarrow} \pi^* \stackrel{E}{\longrightarrow} v^*
+\end{equation*}
+
+Dado que cada paso garantiza una mejora estricta (salvo que se alcance la optimalidad) y que un MDP finito posee un número acotado de políticas, este procedimiento iterativo, conocido como \textbf{Policy Iteration}, converge de manera exacta en una cantidad finita de pasos.
+
+\subsection*{Value Iteration}
+La \textbf{Value Iteration}  es un algoritmo que simplifica la evaluación de políticas al limitarla a un único \textit{backup} por estado. Al incorporar el operador de máximo ($\max_a$) de manera directa sobre la ecuación de optimalidad, fusiona la evaluación truncada y la mejora de políticas en una única regla de actualización:
+
+\begin{equation*}
+    v_{k+1}(s) = \max_a \sum_{s', r} p(s', r \mid s, a) \left[ r + \gamma v_k(s') \right] 
+\end{equation*}
+
+A partir de cualquier función de valor inicial arbitraria $v_0$, este procedimiento iterativo garantiza la convergencia matemática hacia la función de valor óptima ($v_*$).
+
+\subsection*{Generalized Policy Iteration (GPI)}
+La iteración de políticas consta de dos procesos simultáneos e interactivos, uno que hace que la función de valor sea consistente con la política actual (policy evaluation) y el otro que hace que la política sea golosa con respecto a la función de valor actual (policy improvement).
+Utilizamos el término \textbf{generalized policy iteration} para referirnos a la idea general de permitir que los procesos de evaluación de políticas y mejora de políticas interactúen, independientemente de la granularidad y otros detalles de los dos procesos.
+
+Ambos procesos se estabilizan simultáneamente solo cuando se alcanza la optimalidad (cuando la función de valor es consistente con la política y esta es golosa respecto a dicha función, satisfaciendo la ecuación de Bellman).
 
 \end{document}
